@@ -140,6 +140,23 @@ def insert_data_cell(doc_id, index, cell_type, context=None, meta=None):
 
 
 @register(
+    "/data_cell/<int:cell_id>/",
+    methods=["GET"],
+)
+def get_data_cell(cell_id):
+    return logic.get_data_cell_by_id(cell_id)
+
+
+@register(
+    "/data_cell/<int:cell_id>/latest_execution/",
+    methods=["GET"],
+)
+def get_data_cell_latest_execution(cell_id):
+    dc = logic.get_data_cell_by_id(cell_id)
+    return dc.get_latest_execution()
+
+
+@register(
     "/datadoc/<int:doc_id>/cell/<int:from_index>/<int:to_index>/", methods=["PUT"]
 )
 def move_data_cell(doc_id, from_index, to_index):

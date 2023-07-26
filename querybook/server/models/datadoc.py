@@ -132,6 +132,12 @@ class DataCell(Base):
 
         return item
 
+    def get_latest_execution(self):
+        qe = self.query_executions
+        if len(qe) == 0:
+            return {}
+        return qe[0].to_dict()
+
 
 class DataDocDataCell(Base):
     __tablename__ = "data_doc_data_cell"

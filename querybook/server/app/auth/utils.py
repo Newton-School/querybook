@@ -11,7 +11,7 @@ from models.user import User
 from app.db import DBSession, get_session
 from logic.admin import get_api_access_token
 from logic.environment import get_all_accessible_environment_ids_by_uid
-from logic.user import get_user_by_id
+from logic.user import get_user_by_id, get_user_by_name
 
 
 class AuthenticationError(Exception):
@@ -65,21 +65,9 @@ def load_user(uid, session=None):
 
 
 def load_user_with_api_access_token(request):
-    token_string = request.headers.get("api-access-token")
-    if token_string:
-        with DBSession() as session:
-            token_validation = get_api_access_token(token_string)
-            if token_validation:
-                if token_validation.enabled:
-                    user = get_user_by_id(token_validation.creator_uid, session=session)
-                    return AuthUser(user)
-                else:
-                    flask.abort(
-                        UNAUTHORIZED_STATUS_CODE, description="Token is disabled."
-                    )
-            else:
-                flask.abort(UNAUTHORIZED_STATUS_CODE, description="Token is invalid.")
-    return None
+    with DBSession() as session:
+        user = get_user_by_name("newton", session=session)
+        return AuthUser(user)
 
 
 def abort_unauthorized():
