@@ -15,9 +15,22 @@ import { SoftButton } from 'ui/Button/Button';
 import { CommentButton } from 'ui/Comment/CommentButton';
 import { Dropdown } from 'ui/Dropdown/Dropdown';
 import { IListMenuItem, ListMenu } from 'ui/Menu/ListMenu';
+import { convertToRaw } from 'draft-js'
 
 const COPY_CELL_SHORTCUT = getShortcutSymbols(KeyMap.dataDoc.copyCell.key);
 const PASTE_CELL_SHORTCUT = getShortcutSymbols(KeyMap.dataDoc.pasteCell.key);
+
+const getValueOrEmptyString = (value: any): string => {
+    return typeof value === "string" ? value :''
+}
+
+const getContextValueOfCellString = (value: any, cellType: string): string => {
+    if (cellType === "text") {
+        console.log(value)
+        return convertToRaw(value).blocks.map((block: any): string => block.text).join('\n');
+    }
+    return ''
+}
 
 const cellTypes = DatadocConfig.cell_types;
 
@@ -47,6 +60,9 @@ interface IProps {
     isCollapsedDefault?: boolean;
     toggleDefaultCollapsed?: () => Promise<any>;
     shareUrl?: string;
+    cellTitle?: string;
+    cellContext?: any;
+    cellType?: string;
 }
 
 export const DataDocCellControl: React.FunctionComponent<IProps> = ({
@@ -67,11 +83,17 @@ export const DataDocCellControl: React.FunctionComponent<IProps> = ({
     showCollapsed,
     setShowCollapsed,
     isCollapsedDefault,
+    cellTitle,
+    cellContext,
+    cellType,
     toggleDefaultCollapsed,
     shareUrl,
 }) => {
     const [animateDefaultChange, setAnimateDefaultChange] =
-        React.useState(false);
+        React.useState(false); 
+
+    const cellTitleContainsDND = getValueOrEmptyString(cellTitle).toUpperCase().includes("[DND]")
+    const cellContextContainsDND = getContextValueOfCellString(cellContext, cellType).toUpperCase().includes("[DND]")
 
     const handleToggleDefaultCollapsed = React.useCallback(() => {
         trackClick({
@@ -162,17 +184,19 @@ export const DataDocCellControl: React.FunctionComponent<IProps> = ({
 
     if (isEditable) {
         // Delete Button
-        rightButtons.push(
-            deleteCellAt && isHeader && numberOfCells > 0 && (
-                <AsyncButton
-                    className="block-crud-button"
-                    onClick={handleDeleteCell}
-                    icon="X"
-                    type="soft"
-                    key="delete"
-                />
-            )
-        );
+        if (!cellTitleContainsDND && !cellContextContainsDND) {
+            rightButtons.push(
+                deleteCellAt && isHeader && numberOfCells > 0 && (
+                    <AsyncButton
+                        className="block-crud-button"
+                        onClick={handleDeleteCell}
+                        icon="X"
+                        type="soft"
+                        key="delete"
+                    />
+                )
+            );
+        }
 
         // Swap Button
         rightButtons.push(

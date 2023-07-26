@@ -233,6 +233,9 @@ export const DataDocCell: React.FunctionComponent<IDataDocCellProps> =
                         isCollapsedDefault={
                             Boolean(cell.meta.collapsed) === showCollapsed
                         }
+                        cellTitle={cell.meta.title}
+                        cellContext={cell.context}
+                        cellType={cell.cell_type}
                         toggleDefaultCollapsed={handleDefaultCollapseChange}
                         shareUrl={shareUrl}
                     />
