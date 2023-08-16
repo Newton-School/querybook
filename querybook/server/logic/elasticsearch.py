@@ -63,7 +63,10 @@ def get_hosted_es():
     hosted_es = None
 
     if QuerybookSettings.ELASTICSEARCH_CONNECTION_TYPE == "naive":
-        hosted_es = Elasticsearch(hosts=QuerybookSettings.ELASTICSEARCH_HOST)
+        try:
+            hosted_es = Elasticsearch(hosts=QuerybookSettings.ELASTICSEARCH_HOST)
+        except Exception as e:
+            return None
     elif QuerybookSettings.ELASTICSEARCH_CONNECTION_TYPE == "aws":
 
         # TODO: generialize aws region setup
