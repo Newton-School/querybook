@@ -87,6 +87,19 @@ function getDevServerSettings(env) {
     return settings;
 }
 
+function getProdServerSettings(env) {
+    const WS_PUBLIC_URL = process.env.WS_PUBLIC_URL
+    return {
+        proxy: {
+            '/-/socket.io/*': {
+                target: WS_PUBLIC_URL,
+                changeOrigin: true,
+                ws: true,
+            },
+        }
+    }
+}
+
 module.exports = (env, options) => {
     const PROD = ((env && env.NODE_ENV) || options.mode) === 'production';
     const mode = PROD ? 'production' : 'development';
@@ -121,7 +134,7 @@ module.exports = (env, options) => {
     }
 
     const appName = process.env.QUERYBOOK_APPNAME || 'Querybook';
-    const devServer = env.WEBPACK_SERVE ? getDevServerSettings(env) : {};
+    const devServer = env.WEBPACK_SERVE ? getDevServerSettings(env) : getProdServerSettings(env);
 
     return {
         entry,
