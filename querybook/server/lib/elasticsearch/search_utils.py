@@ -2,6 +2,8 @@ from typing import Dict, Union
 from lib.logger import get_logger
 from logic.elasticsearch import get_hosted_es
 
+import os
+
 LOG = get_logger(__file__)
 
 
@@ -22,10 +24,14 @@ def _parse_results(results, get_count):
     return ret
 
 
+def appended_index(index_name):
+    hash_prefix = f"{os.getenv('PLAYGROUND_HASH', '_')}_"
+
+
 def get_matching_objects(query: Union[str, Dict], index_name, get_count=False):
     result = None
     try:
-        result = get_hosted_es().search(index=index_name, body=query)
+        result = get_hosted_es().search(index=appended_index(index_name), body=query)
     except Exception as e:
         LOG.warning("Got ElasticSearch exception: \n " + str(e))
 
@@ -38,7 +44,7 @@ def get_matching_objects(query: Union[str, Dict], index_name, get_count=False):
 def get_matching_suggestions(query: Union[str, Dict], index_name: str):
     result = None
     try:
-        result = get_hosted_es().search(index=index_name, body=query)
+        result = get_hosted_es().search(index=appended_index(index_name), body=query)
     except Exception as e:
         LOG.warning(e)
     finally:

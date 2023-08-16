@@ -46,14 +46,14 @@ services:
         command: './querybook/scripts/runservice worker -c 5'
         volumes: *querybook-volumes
         depends_on: *querybook-depends-on
-    scheduler:
-        container_name: querybook_scheduler
-        image: *querybook-image
-        tty: true
-        stdin_open: true
-        command: './querybook/scripts/runservice scheduler --pidfile="/opt/celerybeat.pid"'
-        volumes: *querybook-volumes
-        depends_on: *querybook-depends-on
+    # scheduler:
+    #     container_name: querybook_scheduler
+    #     image: *querybook-image
+    #     tty: true
+    #     stdin_open: true
+    #     command: './querybook/scripts/runservice scheduler --pidfile="/opt/celerybeat.pid"'
+    #     volumes: *querybook-volumes
+    #     depends_on: *querybook-depends-on
     redis:
         container_name: querybook_redis
         image: redis:5.0.9

@@ -2,6 +2,7 @@ from html import escape
 from itertools import chain
 import math
 import re
+import os
 from typing import Any, Dict, List, Optional, Set
 
 from const.impression import ImpressionItemType
@@ -51,6 +52,10 @@ from models.board import Board
 
 LOG = get_logger(__file__)
 ES_CONFIG = get_config_value("elasticsearch")
+
+
+def appended_index(index_name):
+    hash_prefix = f"{os.getenv('PLAYGROUND_HASH', '_')}_"
 
 
 @in_mem_memoized(3600)
@@ -860,15 +865,15 @@ def update_board_by_id(board_id, session=None):
 
 
 def _insert(index_name, id, content):
-    get_hosted_es().index(index=index_name, id=id, body=content)
+    get_hosted_es().index(index=appended_index(index_name), id=id, body=content)
 
 
 def _delete(index_name, id):
-    get_hosted_es().delete(index=index_name, id=id)
+    get_hosted_es().delete(index=appended_index(index_name), id=id)
 
 
 def _update(index_name, id, content):
-    get_hosted_es().update(index=index_name, id=id, body=content)
+    get_hosted_es().update(index=appended_index(index_name), id=id, body=content)
 
 
 def _bulk_insert_index(type_name: str):
@@ -895,16 +900,16 @@ def _bulk_insert_index(type_name: str):
 def create_indices(*config_names):
     es_configs = get_es_config_by_name(*config_names)
     for es_config in es_configs:
-        get_hosted_es().indices.create(es_config["index_name"], es_config["mappings"])
+        get_hosted_es().indices.create(appended_index(es_config["index_name"]), es_config["mappings"])
         _bulk_insert_index(es_config["type_name"])
 
 
 def create_indices_if_not_exist(*config_names):
     es_configs = get_es_config_by_name(*config_names)
     for es_config in es_configs:
-        if not get_hosted_es().indices.exists(index=es_config["index_name"]):
+        if not get_hosted_es().indices.exists(index=appended_index(es_config["index_name"])):
             get_hosted_es().indices.create(
-                es_config["index_name"], es_config["mappings"]
+                appended_index(es_config["index_name"]), es_config["mappings"]
             )
             _bulk_insert_index(es_config["type_name"])
 
@@ -912,7 +917,7 @@ def create_indices_if_not_exist(*config_names):
 def delete_indices(*config_names):
     es_configs = get_es_config_by_name(*config_names)
     for es_config in es_configs:
-        get_hosted_es().indices.delete(es_config["index_name"])
+        get_hosted_es().indices.delete(appended_index(es_config["index_name"]))
 
 
 def get_es_config_by_name(*config_names):
@@ -931,7 +936,7 @@ def update_indices(*config_names):
     for config in es_configs:
         index_name = config["index_name"]
         mapping = config["mappings"]["mappings"]
-        get_hosted_es().indices.put_mapping(mapping, index=index_name)
+        get_hosted_es().indices.put_mapping(mapping, index=appended_index(index_name))
 
 
 def bulk_update_index_by_fields(config_name, fields):
