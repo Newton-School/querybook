@@ -55,7 +55,8 @@ ES_CONFIG = get_config_value("elasticsearch")
 
 
 def appended_index(index_name):
-    hash_prefix = f"{os.getenv('PLAYGROUND_HASH', '_')}_"
+    hash_prefix = f"{os.getenv('PLAYGROUND_HASH', '')}_{index_name}"
+    return hash_prefix
 
 
 @in_mem_memoized(3600)
